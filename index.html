@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Trajeto Seguro — Conectar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ground:#0B111C; --surface:#141C2C; --ink:#EEF2F6; --muted:#8A96A8;
+  --rule:#232E42; --rule-strong:#3A4A66; --accent:#22C55E; --signal:#4C8DFF; --teal:#2DD4BF; --red:#F04C4C;
+  --bar-track:#1E2A3E;
+  --sans:"Archivo","Helvetica Neue",Arial,sans-serif;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0;background:var(--ground);color:var(--ink);
+  font-family:var(--sans);font-size:17px;line-height:1.5;
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+  min-height:100%;
+}
+.wrap{max-width:480px;margin:0 auto;padding:0 20px 60px;min-height:100vh;display:flex;flex-direction:column;}
+
+.screen{display:none;flex:1;flex-direction:column;padding-top:14vh;}
+.screen.active{display:flex;}
+
+.net-card{margin-top:auto;margin-bottom:auto;}
+.net-label{font-size:11.5px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin:0 0 10px;}
+.net-name{font-weight:800;font-size:clamp(24px,7vw,30px);letter-spacing:-0.015em;margin:0 0 6px;}
+.net-sub{margin:0 0 30px;color:var(--muted);font-size:15.5px;max-width:38ch;}
+.net-row{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-top:1px solid var(--rule);}
+.net-row:last-of-type{border-bottom:1px solid var(--rule);}
+.net-row-name{font-size:15px;font-weight:500;}
+.net-row-status{font-size:12px;color:var(--muted);}
+
+.btn{
+  font-weight:600;font-size:15px;border:1px solid var(--accent);border-radius:8px;
+  background:var(--accent);color:#0B111C;padding:14px 20px;cursor:pointer;width:100%;
+}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--rule-strong);}
+.btn:disabled{opacity:0.45;cursor:default;}
+
+h2{font-weight:700;font-size:22px;letter-spacing:-0.01em;margin:0 0 6px;}
+.formsub{color:var(--muted);font-size:15px;margin:0 0 26px;}
+fieldset{border:0;margin:0 0 22px;padding:0;}
+legend{font-size:13px;font-weight:600;color:var(--ink);margin:0 0 10px;padding:0;}
+.opts{display:flex;flex-wrap:wrap;gap:8px;}
+.opt{font-size:13.5px;border:1px solid var(--rule-strong);border-radius:8px;padding:9px 13px;cursor:pointer;user-select:none;}
+.opt input{position:absolute;opacity:0;width:0;height:0;}
+.opt.checked{background:var(--accent);color:#0B111C;border-color:var(--accent);}
+select, textarea{
+  width:100%;font-family:var(--sans);font-size:16px;color:var(--ink);
+  background:var(--surface);border:1px solid var(--rule-strong);border-radius:8px;padding:11px 12px;
+}
+textarea{min-height:76px;resize:vertical;font-size:14.5px;}
+.geo-note{font-size:12.5px;color:var(--muted);border:1px solid var(--rule);border-radius:8px;padding:10px 12px;margin:0 0 22px;}
+.geo-note.ok{color:var(--teal);}
+.err{font-size:13px;color:var(--red);margin:0 0 14px;display:none;}
+
+.thanks h2{margin-bottom:8px;}
+.count{font-weight:800;font-size:44px;letter-spacing:-0.02em;color:var(--accent);margin:24px 0 4px;}
+.count-label{font-size:12.5px;color:var(--muted);margin:0 0 26px;}
+.mapbox{border:1px solid var(--rule-strong);border-radius:10px;background:var(--surface);aspect-ratio:1/1;position:relative;overflow:hidden;margin-bottom:18px;}
+.mapbox .pt{position:absolute;width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:50%;background:var(--accent);opacity:0.6;}
+.mapbox .pt.you{background:var(--signal);opacity:0.95;}
+.mapbox .empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12.5px;color:var(--muted);text-align:center;padding:20px;}
+.footnote{font-size:12px;color:var(--muted);margin-top:auto;padding-top:20px;}
+.local-note{font-size:11.5px;color:var(--muted);border-top:1px solid var(--rule);padding-top:10px;margin-top:6px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <section class="screen active" id="screenConnect">
+    <div class="net-card">
+      <p class="net-label">Redes Wi-Fi disponíveis</p>
+      <div class="net-row"><span class="net-row-name">Trajeto Seguro — RMR</span><span class="net-row-status">Aberta</span></div>
+      <p class="net-name" style="margin-top:22px;">Trajeto Seguro</p>
+      <p class="net-sub">Toque em conectar e responda 8 perguntas rápidas sobre o seu trajeto até a faculdade. Leva menos de 1 minuto.</p>
+      <button class="btn" id="btnConnect" type="button">Conectar</button>
+    </div>
+  </section>
+
+  <section class="screen" id="screenForm">
+    <h2>Seu trajeto até a faculdade</h2>
+    <p class="formsub">Sem cadastro. Suas respostas ficam salvas neste aparelho.</p>
+    <p class="err" id="formErr">Responde as perguntas marcadas antes de enviar.</p>
+
+    <fieldset><legend>Você é</legend>
+      <div class="opts" data-group="genero">
+        <label class="opt"><input type="radio" name="genero" value="Homem">Homem</label>
+        <label class="opt"><input type="radio" name="genero" value="Mulher">Mulher</label>
+        <label class="opt"><input type="radio" name="genero" value="Prefiro não dizer">Prefiro não dizer</label>
+      </div>
+    </fieldset>
+
+    <fieldset><legend>Faixa etária</legend>
+      <select id="faixaEtaria">
+        <option value="">Selecione</option>
+        <option>18 a 24 anos</option><option>25 a 34 anos</option><option>35 a 44 anos</option>
+        <option>45 a 54 anos</option><option>55 a 64 anos</option><option>65 anos ou mais</option>
+      </select>
+    </fieldset>
+
+    <fieldset><legend>Período que estuda</legend>
+      <div class="opts" data-group="periodo">
+        <label class="opt"><input type="radio" name="periodo" value="Matutino">Matutino</label>
+        <label class="opt"><input type="radio" name="periodo" value="Diurno">Diurno</label>
+        <label class="opt"><input type="radio" name="periodo" value="Noturno">Noturno</label>
+      </div>
+    </fieldset>
+
+    <fieldset><legend>Já foi assaltado, roubado ou ameaçado indo ou voltando da faculdade?</legend>
+      <div class="opts" data-group="assalto">
+        <label class="opt"><input type="radio" name="assalto" value="Sim">Sim</label>
+        <label class="opt"><input type="radio" name="assalto" value="Não">Não</label>
+      </div>
+    </fieldset>
+
+    <fieldset><legend>Transporte que mais usa</legend>
+      <div class="opts" data-group="transporte">
+        <label class="opt"><input type="radio" name="transporte" value="Público">Público</label>
+        <label class="opt"><input type="radio" name="transporte" value="Particular">Particular</label>
+      </div>
+    </fieldset>
+
+    <fieldset><legend>Sente-se seguro no transporte, independente do meio?</legend>
+      <div class="opts" data-group="seguro">
+        <label class="opt"><input type="radio" name="seguro" value="Sim">Sim</label>
+        <label class="opt"><input type="radio" name="seguro" value="Não">Não</label>
+      </div>
+    </fieldset>
+
+    <fieldset><legend>O que mais influencia sua sensação de segurança</legend>
+      <div class="opts" data-group="influencia" data-multi="true">
+        <label class="opt"><input type="checkbox" value="Iluminação das ruas">Iluminação das ruas</label>
+        <label class="opt"><input type="checkbox" value="Movimento de pessoas">Movimento de pessoas</label>
+        <label class="opt"><input type="checkbox" value="Presença de comércio aberto">Comércio aberto</label>
+        <label class="opt"><input type="checkbox" value="Presença de transporte público">Transporte público</label>
+        <label class="opt"><input type="checkbox" value="Presença de agentes de segurança">Agentes de segurança</label>
+        <label class="opt"><input type="checkbox" value="Condições das calçadas e do espaço urbano">Calçadas e espaço urbano</label>
+        <label class="opt"><input type="checkbox" value="Experiências anteriores">Experiências anteriores</label>
+      </div>
+    </fieldset>
+
+    <fieldset><legend>O que tornaria seu trajeto mais seguro? (opcional)</legend>
+      <textarea id="melhoria" placeholder="Escreva livremente..."></textarea>
+    </fieldset>
+
+    <p class="geo-note" id="geoNote">Ao enviar, vamos pedir sua localização para posicionar sua resposta no mapa. Você pode recusar e enviar mesmo assim.</p>
+    <button class="btn" id="btnSubmit" type="button">Enviar e ver o mapa</button>
+  </section>
+
+  <section class="screen thanks" id="screenThanks">
+    <h2>Conectado.</h2>
+    <p class="formsub">Sua resposta foi salva neste aparelho.</p>
+    <div class="count" id="count">0</div>
+    <p class="count-label">respostas salvas aqui</p>
+    <div class="mapbox" id="mapbox"><div class="empty">O mapa aparece aqui conforme as respostas chegam.</div></div>
+    <button class="btn ghost" id="btnAgain" type="button">Responder de novo</button>
+    <p class="footnote">Trajeto Seguro — pesquisa aplicada no Hackathon Recriando a Cidade.</p>
+    <p class="local-note">As respostas ficam salvas só neste navegador (localStorage). Para juntar respostas de vários aparelhos num só lugar, é preciso ligar isso a um backend — fale com o time se quiser configurar.</p>
+  </section>
+
+</div>
+
+<script>
+const STORAGE_KEY = "trajeto-seguro-respostas";
+
+function show(id){
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
+
+document.getElementById("btnConnect").addEventListener("click", () => show("screenForm"));
+document.getElementById("btnAgain").addEventListener("click", () => {
+  document.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
+  document.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false);
+  document.querySelectorAll(".opt").forEach(o => o.classList.remove("checked"));
+  document.getElementById("faixaEtaria").value = "";
+  document.getElementById("melhoria").value = "";
+  document.getElementById("formErr").style.display = "none";
+  show("screenForm");
+});
+
+document.querySelectorAll(".opt").forEach(label => {
+  const input = label.querySelector("input");
+  label.addEventListener("click", () => {
+    if(input.type === "radio"){
+      const group = label.closest(".opts");
+      group.querySelectorAll(".opt").forEach(o => o.classList.remove("checked"));
+      requestAnimationFrame(() => { if(input.checked) label.classList.add("checked"); });
+    } else {
+      requestAnimationFrame(() => label.classList.toggle("checked", input.checked));
+    }
+  });
+});
+
+function getRadio(name){
+  const el = document.querySelector('input[name="' + name + '"]:checked');
+  return el ? el.value : null;
+}
+
+function getGeo(){
+  return new Promise(resolve => {
+    if(!navigator.geolocation){ resolve({error:"not-supported"}); return; }
+    navigator.geolocation.getCurrentPosition(
+      pos => resolve({lat: pos.coords.latitude, lng: pos.coords.longitude}),
+      err => resolve({error: err && err.code === 1 ? "denied" : (err && err.code === 3 ? "timeout" : "unavailable")}),
+      {timeout: 6000}
+    );
+  });
+}
+
+function loadLocal(){
+  try{ return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]"); }
+  catch(e){ return []; }
+}
+function saveLocal(list){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(list)); }catch(e){}
+}
+
+document.getElementById("btnSubmit").addEventListener("click", async () => {
+  const genero = getRadio("genero"), periodo = getRadio("periodo"), assalto = getRadio("assalto"),
+        transporte = getRadio("transporte"), seguro = getRadio("seguro"),
+        faixaEtaria = document.getElementById("faixaEtaria").value,
+        influencia = Array.from(document.querySelectorAll('input[type="checkbox"]:checked')).map(c => c.value),
+        melhoria = document.getElementById("melhoria").value.trim();
+
+  if(!genero || !periodo || !assalto || !transporte || !seguro || !faixaEtaria){
+    document.getElementById("formErr").style.display = "block";
+    return;
+  }
+  document.getElementById("formErr").style.display = "none";
+
+  const btn = document.getElementById("btnSubmit");
+  btn.disabled = true; btn.textContent = "Localizando...";
+
+  const geoResult = await getGeo();
+  const hasGeo = geoResult && typeof geoResult.lat === "number";
+  const note = document.getElementById("geoNote");
+  if(hasGeo){ note.textContent = "Localização compartilhada."; note.classList.add("ok"); }
+  else{
+    const reasons = {denied:"Você recusou o compartilhamento de localização.", timeout:"Não deu tempo de captar a localização.",
+      "not-supported":"Este navegador não suporta localização.", unavailable:"Não foi possível captar a localização agora."};
+    note.textContent = (reasons[geoResult && geoResult.error] || "Enviado sem localização.") + " A resposta foi salva mesmo assim.";
+  }
+
+  const record = {
+    id: "r_" + Date.now() + "_" + Math.random().toString(36).slice(2, 8),
+    genero, faixaEtaria, periodo, assalto, transporte, seguro, influencia, melhoria,
+    lat: hasGeo ? geoResult.lat : null, lng: hasGeo ? geoResult.lng : null,
+    submittedAt: new Date().toISOString()
+  };
+
+  const list = loadLocal();
+  list.push(record);
+  saveLocal(list);
+
+  btn.disabled = false; btn.textContent = "Enviar e ver o mapa";
+  renderMap(record.id);
+  show("screenThanks");
+});
+
+function renderMap(myId){
+  const list = loadLocal();
+  document.getElementById("count").textContent = list.length;
+
+  const withGeo = list.filter(r => typeof r.lat === "number" && typeof r.lng === "number");
+  const box = document.getElementById("mapbox");
+  box.innerHTML = "";
+
+  if(!withGeo.length){
+    const empty = document.createElement("div");
+    empty.className = "empty";
+    empty.textContent = list.length ? "Nenhuma resposta com localização ainda." : "O mapa aparece aqui conforme as respostas chegam.";
+    box.appendChild(empty);
+    return;
+  }
+
+  let minLat=Infinity,maxLat=-Infinity,minLng=Infinity,maxLng=-Infinity;
+  for(const r of withGeo){ minLat=Math.min(minLat,r.lat); maxLat=Math.max(maxLat,r.lat); minLng=Math.min(minLng,r.lng); maxLng=Math.max(maxLng,r.lng); }
+  const padLat=Math.max((maxLat-minLat)*0.15,0.0015), padLng=Math.max((maxLng-minLng)*0.15,0.0015);
+  minLat-=padLat; maxLat+=padLat; minLng-=padLng; maxLng+=padLng;
+
+  for(const r of withGeo){
+    const x=((r.lng-minLng)/(maxLng-minLng))*100, y=100-((r.lat-minLat)/(maxLat-minLat))*100;
+    const pt=document.createElement("div");
+    pt.className="pt"+(r.id===myId?" you":"");
+    pt.style.left=x+"%"; pt.style.top=y+"%";
+    box.appendChild(pt);
+  }
+}
+
+renderMap(null);
+</script>
+</body>
+</html>
