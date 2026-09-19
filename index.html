@@ -50,7 +50,7 @@ legend{font-size:13px;font-weight:600;color:var(--ink);margin:0 0 10px;padding:0
 .opt{font-size:13.5px;border:1px solid var(--rule-strong);border-radius:8px;padding:9px 13px;cursor:pointer;user-select:none;}
 .opt input{position:absolute;opacity:0;width:0;height:0;}
 .opt.checked{background:var(--accent);color:#0B111C;border-color:var(--accent);}
-select, textarea{
+select, textarea, input[type="text"]{
   width:100%;font-family:var(--sans);font-size:16px;color:var(--ink);
   background:var(--surface);border:1px solid var(--rule-strong);border-radius:8px;padding:11px 12px;
 }
@@ -131,6 +131,14 @@ textarea{min-height:76px;resize:vertical;font-size:14.5px;}
         <label class="opt"><input type="radio" name="seguro" value="Sim">Sim</label>
         <label class="opt"><input type="radio" name="seguro" value="Não">Não</label>
       </div>
+    </fieldset>
+
+    <fieldset><legend>Bairro onde você mora</legend>
+      <input type="text" id="bairroMora" placeholder="Ex.: Casa Amarela, Boa Viagem, Camaragibe...">
+    </fieldset>
+
+    <fieldset><legend>Onde você está agora, ao responder? (bairro, rua ou ponto de referência)</legend>
+      <input type="text" id="localDenuncia" placeholder="Ex.: perto da UNINASSAU Graças">
     </fieldset>
 
     <fieldset><legend>O que mais influencia sua sensação de segurança</legend>
@@ -226,6 +234,8 @@ document.getElementById("btnSubmit").addEventListener("click", async () => {
   const genero = getRadio("genero"), periodo = getRadio("periodo"), assalto = getRadio("assalto"),
         transporte = getRadio("transporte"), seguro = getRadio("seguro"),
         faixaEtaria = document.getElementById("faixaEtaria").value,
+        bairroMora = document.getElementById("bairroMora").value.trim(),
+        localDenuncia = document.getElementById("localDenuncia").value.trim(),
         influencia = Array.from(document.querySelectorAll('input[type="checkbox"]:checked')).map(c => c.value),
         melhoria = document.getElementById("melhoria").value.trim();
 
@@ -251,6 +261,7 @@ document.getElementById("btnSubmit").addEventListener("click", async () => {
   const record = {
     id: "r_" + Date.now() + "_" + Math.random().toString(36).slice(2, 8),
     genero, faixaEtaria, periodo, assalto, transporte, seguro, influencia, melhoria,
+    bairroMora: bairroMora || null, localDenuncia: localDenuncia || null,
     lat: hasGeo ? geoResult.lat : null, lng: hasGeo ? geoResult.lng : null,
     submittedAt: new Date().toISOString()
   };
